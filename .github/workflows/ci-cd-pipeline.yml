@@ -91,19 +91,17 @@ jobs:
           version: 'v1.21.0'
 
       - name: Set up Kubernetes context
-          env:
-            KUBE_CA: ${{ secrets.KUBE_CA }}  # Decode the KUBE_CA certificate secret (base64 encoded)
-          run: |
-            echo "$KUBE_CA" | base64 -d > ./ca.crt  # Decode the certificate authority into a file
-            kubectl config set-cluster my-cluster \
-              --server=${{ secrets.KUBE_SERVER }} \
-              --certificate-authority=./ca.crt \
-              --embed-certs=true  # Set the Kubernetes cluster config with embedded certificates
-            kubectl config set-credentials my-user --token=${{ secrets.KUBE_TOKEN }}  # Set the credentials (using a token for auth)
-            kubectl config set-context my-context --cluster=my-cluster --user=my-user  # Set the context
-            kubectl config use-context my-context  # Use the specified context
-        
-    
+        env:
+          KUBE_CA: ${{ secrets.KUBE_CA }}  # Decode the KUBE_CA certificate secret (base64 encoded)
+        run: |
+          echo "$KUBE_CA" | base64 -d > ./ca.crt  # Decode the certificate authority into a file
+          kubectl config set-cluster my-cluster \
+            --server=${{ secrets.KUBE_SERVER }} \
+            --certificate-authority=./ca.crt \
+            --embed-certs=true  # Set the Kubernetes cluster config with embedded certificates
+          kubectl config set-credentials my-user --token=${{ secrets.KUBE_TOKEN }}  # Set the credentials (using a token for auth)
+          kubectl config set-context my-context --cluster=my-cluster --user=my-user  # Set the context
+          kubectl config use-context my-context  # Use the specified context
 
       - name: Deploy all K8s manifests
         run: |
