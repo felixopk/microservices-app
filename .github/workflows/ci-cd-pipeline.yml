@@ -78,31 +78,33 @@ jobs:
           docker push $DOCKER_USERNAME/frontend
 
   deploy:
-  runs-on: ubuntu-latest
-  needs: backend
+    runs-on: ubuntu-latest
+    needs: backend
 
-  steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-    - name: Set up kubectl
-      uses: azure/setup-kubectl@v3
-      with:
-        version: 'v1.21.0'
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: 'v1.21.0'
 
-    - name: Set up Kubernetes context
-      env:
-        KUBE_CA: ${{ secrets.KUBE_CA }}
-      run: |
-        echo "$KUBE_CA" | base64 -d > ./ca.crt
-        kubectl config set-cluster my-cluster \
-          --server=${{ secrets.KUBE_SERVER }} \
-          --certificate-authority=./ca.crt \
-          --embed-certs=true
-        kubectl config set-credentials my-user --token=${{ secrets.KUBE_TOKEN }}
-        kubectl config set-context my-context --cluster=my-cluster --user=my-user
-        kubectl config use-context my-context
+      - name: Set up Kubernetes context
+          env:
+            KUBE_CA: ${{ secrets.KUBE_CA }}  # Decode the KUBE_CA certificate secret (base64 encoded)
+          run: |
+            echo "$KUBE_CA" | base64 -d > ./ca.crt  # Decode the certificate authority into a file
+            kubectl config set-cluster my-cluster \
+              --server=${{ secrets.KUBE_SERVER }} \
+              --certificate-authority=./ca.crt \
+              --embed-certs=true  # Set the Kubernetes cluster config with embedded certificates
+            kubectl config set-credentials my-user --token=${{ secrets.KUBE_TOKEN }}  # Set the credentials (using a token for auth)
+            kubectl config set-context my-context --cluster=my-cluster --user=my-user  # Set the context
+            kubectl config use-context my-context  # Use the specified context
+        
+    
 
-    - name: Deploy all K8s manifests
-      run: |
-        kubectl apply -f k8s/
+      - name: Deploy all K8s manifests
+        run: |
+          kubectl apply -f k8s/
