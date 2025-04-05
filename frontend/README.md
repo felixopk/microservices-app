@@ -1,70 +1,138 @@
-# Getting Started with Create React App
+# 🛠️ CI/CD Microservices Project with Kubernetes
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+This project demonstrates a **real-world end-to-end CI/CD pipeline** setup using a **Node.js/Express backend (`user-service`, `task-service`)**, a **React frontend**, and a **Kubernetes-based deployment** workflow. It showcases automation, infrastructure-as-code, debugging, and deployment best practices in a microservices architecture.
 
-## Available Scripts
+---
 
-In the project directory, you can run:
+## 📦 Tech Stack
 
-### `npm start`
+- **Frontend**: React
+- **Backend**: Node.js (Express)
+- **Containerization**: Docker
+- **CI/CD**: GitHub Actions
+- **Orchestration**: Kubernetes (k8s)
+- **IaC**: Terraform (for cluster setup)
+- **Cloud Platform**: AWS (EKS assumed)
+- **Namespace**: `workshop`
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+---
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## 🚀 Features
 
-### `npm test`
+- Microservices-based app (User & Task Services)
+- React UI to interact with backend APIs
+- Dockerized for consistency across environments
+- GitHub Actions for automated build, lint, test & deploy
+- Kubernetes deployment with isolated namespace
+- Helm support for future extension
+- Troubleshooting & recovery strategies included
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+---
 
-### `npm run build`
+## 🧱 Project Structure
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+ci-cd-microservices-app/ ├── backend/ │ ├── user-service/ │ │ ├── Dockerfile │ │ └── deployment.yaml │ ├── task-service/ │ │ ├── Dockerfile │ │ └── deployment.yaml ├── frontend/ │ ├── Dockerfile │ └── deployment.yaml ├── k8s/ │ ├── namespace.yaml │ ├── ingress.yaml │ └── service.yaml ├── .github/workflows/ │ ├── ci.yaml │ └── cd.yaml
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+---
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## 🐳 Docker Setup
 
-### `npm run eject`
+Each service has its own `Dockerfile`.
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+### Example: `user-service/Dockerfile`
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+```Dockerfile
+FROM node:18-alpine
+WORKDIR /app
+COPY . .
+RUN npm install
+EXPOSE 3001
+CMD ["node", "index.js"]
+Push your Docker images to DockerHub:
+docker build -t yourdockerhubusername/user-service .
+docker push yourdockerhubusername/user-service
+Repeat for task-service and frontend.
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+☸️ Kubernetes Setup
+kubectl create ns workshop
+Apply Deployments & Services
+kubectl apply -f k8s/ -n workshop
+Each deployment.yaml includes:
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+containerPort: Internal port exposed by the container
 
-## Learn More
+targetPort: Port the service forwards to inside the pod
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+port: Port exposed by the Kubernetes service
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+✅ Ensure consistency in containerPort/targetPort across your YAML files.
 
-### Code Splitting
+⚠️ Troubleshooting
+❌ ImagePullBackOff
+Reason: Wrong image name or private repo.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+Fix:
 
-### Analyzing the Bundle Size
+Ensure Docker image is public or set up imagePullSecrets.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+Confirm image exists: docker pull yourdockerhubusername/frontend-app:latest
 
-### Making a Progressive Web App
+Correct YAML:
+image: yourdockerhubusername/frontend-app:latest
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+❌ CrashLoopBackOff
+Reason: The container crashes after starting.
 
-### Advanced Configuration
+Debug:
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+bash
+Copy
+Edit
+kubectl logs -n workshop pod-name
+Fix:
 
-### Deployment
+Check missing environment variables.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+Validate CMD or ENTRYPOINT in Dockerfile.
 
-### `npm run build` fails to minify
+Confirm PORT is set and matches the exposed port.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+✅ Example Commands Used
+bash
+Copy
+Edit
+kubectl config set-context --current --namespace=workshop
+kubectl get pods -n workshop
+kubectl describe pod <pod-name> -n workshop
+kubectl logs <pod-name> -n workshop
+
+🧪 CI/CD (GitHub Actions)
+ci.yaml (Build & Lint)
+Triggers on push to main
+
+Runs npm install, lint, unit tests, and builds Docker images
+
+cd.yaml (Deploy to k8s)
+Pushes Docker images
+
+Applies k8s manifests using kubectl
+
+🔍 Lessons Learned
+How to debug ImagePullBackOff and CrashLoopBackOff
+
+Importance of correct container ports and image references
+
+Deploying multi-service apps using Kubernetes
+
+Handling CI/CD failures and rollout strategies
+
+Use of namespaces to isolate environments in Kubernetes
+
+
+👩‍💻 Author
+Felix Oppong – Cloud & DevOps Enthusiast
+GitHub • Portfolio • LinkedIn
+
+📌 Final Notes
+This project was developed as part of a personal challenge to master DevOps tools and cloud-native microservice deployments. All errors encountered were treated as learning opportunities, documented, and resolved hands-on.
+
