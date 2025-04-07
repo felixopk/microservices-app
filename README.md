@@ -106,5 +106,5 @@ Handling CI/CD failures and rollout strategies
 Use of namespaces to isolate environments in Kubernetes
 
 👩‍💻 Author
-Felix Opoku – Cloud & DevOps Enthusiast
+Felix Oppong – Cloud & DevOps Enthusiast
 GitHub • Portfolio • LinkedIn
