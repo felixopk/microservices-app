@@ -107,4 +107,4 @@ Use of namespaces to isolate environments in Kubernetes
 
 👩‍💻 Author
 Felix Oppong – Cloud & DevOps Enthusiast
-GitHub • Portfolio • LinkedIn
+GitHub • Portfolio • LinkedIn.
