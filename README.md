@@ -50,7 +50,7 @@ EXPOSE 3001
 CMD ["node", "index.js"]
 
 Push your Docker images to DockerHub:
-docker build -t yourdockerhubusername/user-service .
+docker build -t yourdockerhubusername/user-service 
 docker push yourdockerhubusername/user-service
 Repeat for task-service and frontend
 
