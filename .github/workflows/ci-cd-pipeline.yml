@@ -92,17 +92,21 @@ jobs:
 
       - name: Set up Kubernetes context
         env:
-          KUBE_CA: ${{ secrets.KUBE_CA }}  # Decode the KUBE_CA certificate secret (base64 encoded)
+          KUBE_CA: ${{ secrets.KUBE_CA }}
         run: |
-          echo "$KUBE_CA" | base64 -d > ./ca.crt  # Decode the certificate authority into a file
-          kubectl config set-cluster my-cluster \
+          echo "$KUBE_CA" | base64 -d > ./ca.crt
+          kubectl config set-cluster opkcluster \
             --server=${{ secrets.KUBE_SERVER }} \
             --certificate-authority=./ca.crt \
-            --embed-certs=true  # Set the Kubernetes cluster config with embedded certificates
-          kubectl config set-credentials my-user --token=${{ secrets.KUBE_TOKEN }}  # Set the credentials (using a token for auth)
-          kubectl config set-context my-context --cluster=my-cluster --user=my-user  # Set the context
-          kubectl config use-context my-context  # Use the specified context
+            --embed-certs=true
+          kubectl config set-credentials opk-user \
+            --token=${{ secrets.KUBE_TOKEN }}
+          kubectl config set-context opk-context \
+            --cluster=opkcluster \
+            --user=opk-user \
+            --namespace=workshop
+          kubectl config use-context opk-context
 
       - name: Deploy all K8s manifests
         run: |
-          kubectl apply -f k8s /
+          kubectl apply -f k8s/
